@@ -22,6 +22,13 @@ public class Cluster {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "Cluster{" +
+                "data=" + data +
+                '}';
+    }
+
     public Entry addEntry(Entry entry) {
         if (data.add(entry)) {
             return entry;
@@ -29,21 +36,13 @@ public class Cluster {
         return null;
     }
 
-    public int getMaximumDistance(Entry entry) {
+    public int getMaximumDistance() {
         int distance = 0;
 
-        for (Entry e : data) {
-            distance = Math.max(distance, e.calculateDistance(entry));
-        }
-
-        return distance;
-    }
-
-    public int getMinimumDistance(Entry entry) {
-        int distance = 0;
-
-        for (Entry e : data) {
-            distance = Math.min(distance, e.calculateDistance(entry));
+        for (int i = 0; i < data.size(); i++) {
+            for (int j = i + 1; j < data.size(); j++) {
+                distance = Math.max(distance, data.get(i).calculateDistance(data.get(j)));
+            }
         }
 
         return distance;
@@ -56,7 +55,7 @@ public class Cluster {
             entry = base;
         } else {
             try {
-                for (Field field : Entry.class.getDeclaredFields()) {
+                for (Field field : Entry.class.getFields()) {
                     field.set(entry, getValueWithBetterRatio(field));
                 }
             } catch (Exception e) {
@@ -74,8 +73,8 @@ public class Cluster {
 
         try {
             for (Entry entry : data) {
-                double r = getRatio(field, (int) field.get(entry));
-                if (r > ratio) {
+                double r;
+                if ((r = getRatio(field, (int) field.get(entry))) > ratio) {
                     value = (int) field.get(entry);
                 }
             }

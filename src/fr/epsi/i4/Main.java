@@ -11,13 +11,11 @@ public class Main {
 
         generateData(master);
 
-        master.dispatch();
+        master.dispatch(7);
 
-        for (Cluster cluster : master.getClusters()) {
-            System.out.println(cluster.getData().size());
-        }
+        System.out.println(master.toString());
 
-//        master.displayDistances();
+        master.displayDistances();
 
 //        System.out.println(master.getMaximumDistance());
     }
