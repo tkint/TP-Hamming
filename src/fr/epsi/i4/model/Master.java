@@ -1,6 +1,7 @@
 package fr.epsi.i4.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Master {
@@ -61,12 +62,35 @@ public class Master {
         return distance;
     }
 
+    public Cluster getLastNotEmptyCluster() {
+        Cluster cluster = clusters.get(0);
+
+        for (Cluster c : clusters) {
+            if (c.isEmpty()) {
+                return cluster;
+            }
+            cluster = c;
+        }
+
+        return cluster;
+    }
+
     public void displayDistances() {
         for (int i = 0; i < data.size(); i++) {
             for (int j = i + 1; j < data.size(); j++) {
                 System.out.println("Distance between " + data.get(i).getId() + " and " + data.get(j).getId() + " : " + data.get(i).calculateDistance(data.get(j)));
             }
         }
+    }
+
+    private List<Cluster> getClustersExcept(Cluster cluster) {
+        List<Cluster> clusters = new ArrayList<>();
+        for (Cluster c : this.clusters) {
+            if (!c.equals(cluster)) {
+                clusters.add(c);
+            }
+        }
+        return clusters;
     }
 
     // TODO: Il faut redispatcher au fur et à mesure du remplissage des clusters
@@ -77,9 +101,18 @@ public class Master {
             clusters.add(new Cluster());
         }
 
+        List<Entry> placedEntries = new ArrayList<>();
+
         for (Entry entry : data) {
-            Cluster cluster = entry.getCloserCluster(clusters);
-            cluster.addEntry(entry);
+            if (entry.isFarther(placedEntries)) {
+                Cluster lastCluster = getLastNotEmptyCluster();
+                lastCluster.dispatch(getClustersExcept(lastCluster));
+                lastCluster.addEntry(entry);
+            } else {
+                Cluster cluster = entry.getCloserCluster(clusters);
+                cluster.addEntry(entry);
+            }
+            placedEntries.add(entry);
         }
     }
 }

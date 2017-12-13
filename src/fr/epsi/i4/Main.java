@@ -9,13 +9,13 @@ public class Main {
     public static void main(String[] args) {
         Master master = new Master();
 
-        generateData(master);
+        generateDataBis(master);
 
-        master.dispatch(7);
+        master.dispatch(3);
 
         System.out.println(master.toString());
 
-        master.displayDistances();
+//        master.displayDistances();
 
 //        System.out.println(master.getMaximumDistance());
     }
@@ -31,5 +31,18 @@ public class Main {
         master.addEntry(new Entry(1, 1, 1, 0));
         master.addEntry(new Entry(1, 1, 1, 1));
         master.addEntry(new Entry(1, 2, 1, 1));
+    }
+
+    public static void generateDataBis(Master master) {
+        master.addEntry(new Entry(0, 2, 2, 0));
+        master.addEntry(new Entry(0, 1, 2, 0));
+        master.addEntry(new Entry(1, 2, 1, 1));
+        master.addEntry(new Entry(0, 2, 1, 0));
+        master.addEntry(new Entry(0, 2, 2, 1));
+        master.addEntry(new Entry(0, 1, 1, 1));
+        master.addEntry(new Entry(1, 2, 2, 1));
+        master.addEntry(new Entry(1, 1, 1, 0));
+        master.addEntry(new Entry(1, 1, 1, 1));
+//        master.addEntry(new Entry(1, 2, 1, 1));
     }
 }

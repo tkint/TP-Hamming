@@ -125,4 +125,17 @@ public class Entry {
 
         return cluster;
     }
+
+    public boolean isFarther(List<Entry> entries) {
+        boolean farther = false;
+
+        for (int i = 0; i < entries.size(); i++) {
+            for (int j = i + 1; j < entries.size(); j++) {
+                farther = calculateDistance(entries.get(i)) > entries.get(i).calculateDistance(entries.get(j));
+            }
+        }
+
+
+        return farther;
+    }
 }
