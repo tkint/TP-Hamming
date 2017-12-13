@@ -62,6 +62,16 @@ public class Master {
         return distance;
     }
 
+    public Cluster getFirstEmptyCluster() {
+        for (Cluster c : clusters) {
+            if (c.isEmpty()) {
+                return c;
+            }
+        }
+
+        return clusters.get(0);
+    }
+
     public Cluster getLastNotEmptyCluster() {
         Cluster cluster = clusters.get(0);
 
@@ -105,7 +115,7 @@ public class Master {
 
         for (Entry entry : data) {
             if (entry.isFarther(placedEntries)) {
-                Cluster lastCluster = getLastNotEmptyCluster();
+                Cluster lastCluster = getFirstEmptyCluster();
                 lastCluster.dispatch(getClustersExcept(lastCluster));
                 lastCluster.addEntry(entry);
             } else {

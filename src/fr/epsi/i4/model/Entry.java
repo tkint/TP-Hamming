@@ -6,7 +6,7 @@ import java.util.List;
 public class Entry {
 
     private int id;
-    private static int nextId;
+    private static int nextId = 1;
 
     public int couleur;
     public int noyaux;
@@ -114,7 +114,7 @@ public class Entry {
 
         int maxDistance = 0;
         for (Cluster c : clusters) {
-            if (getMaximumDistanceWithCluster(c) <= c.getMaximumDistance()) {
+            if (getMaximumDistanceWithCluster(c) < c.getMaximumDistance()) {
                 return c;
             }
             if (maxDistance == 0 || getMaximumDistanceWithCluster(c) < maxDistance) {

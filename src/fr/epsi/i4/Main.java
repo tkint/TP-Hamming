@@ -11,11 +11,11 @@ public class Main {
 
         generateDataBis(master);
 
-        master.dispatch(3);
+        master.dispatch(2);
 
         System.out.println(master.toString());
 
-//        master.displayDistances();
+        master.displayDistances();
 
 //        System.out.println(master.getMaximumDistance());
     }
