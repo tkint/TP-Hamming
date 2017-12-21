@@ -1,7 +1,6 @@
 package fr.epsi.i4.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class Master {
@@ -111,18 +110,10 @@ public class Master {
             clusters.add(new Cluster());
         }
 
-        List<Entry> placedEntries = new ArrayList<>();
-
         for (Entry entry : data) {
-            if (entry.isFarther(placedEntries)) {
-                Cluster lastCluster = getFirstEmptyCluster();
-                lastCluster.dispatch(getClustersExcept(lastCluster));
-                lastCluster.addEntry(entry);
-            } else {
-                Cluster cluster = entry.getCloserCluster(clusters);
-                cluster.addEntry(entry);
-            }
-            placedEntries.add(entry);
+            Cluster cluster = entry.getCloserCluster(clusters);
+            cluster.addEntry(entry);
+            cluster.dispatch(clusters);
         }
     }
 }

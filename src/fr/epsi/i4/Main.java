@@ -9,15 +9,15 @@ public class Main {
     public static void main(String[] args) {
         Master master = new Master();
 
-        generateDataBis(master);
+        generateData(master);
 
         master.dispatch(2);
 
         System.out.println(master.toString());
 
-        master.displayDistances();
+//        master.displayDistances();
 
-//        System.out.println(master.getMaximumDistance());
+//        System.out.println(master.getInternMaximumDistance());
     }
 
     public static void generateData(Master master) {

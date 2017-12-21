@@ -6,9 +6,11 @@ import java.util.*;
 public class Cluster {
 
     private List<Entry> data;
+    private List<Integer> distances;
 
     public Cluster() {
         data = new ArrayList<>();
+        distances = new ArrayList<>();
     }
 
     public List<Entry> getData() {
@@ -28,9 +30,24 @@ public class Cluster {
 
     public Entry addEntry(Entry entry) {
         if (data.add(entry)) {
+            for (Entry e : data) {
+                distances.add(e.calculateDistance(entry));
+            }
             return entry;
         }
         return null;
+    }
+
+    public int countDistanceOccurences(int distance) {
+        int count = 0;
+
+        for (int d : distances) {
+            if (d == distance) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     public Entry removeEntry(int id) {
@@ -41,7 +58,7 @@ public class Cluster {
         return data.isEmpty();
     }
 
-    public int getMaximumDistance() {
+    public int getInternMaximumDistance() {
         int distance = 0;
 
         for (int i = 0; i < data.size(); i++) {
@@ -54,10 +71,16 @@ public class Cluster {
     }
 
     public void dispatch(List<Cluster> clusters) {
-        for (Entry entry : data) {
-            Cluster cluster = entry.getCloserCluster(clusters);
-            cluster.addEntry(entry);
+        List<Integer> indexes = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            Cluster cluster = data.get(i).getCloserCluster(clusters);
+            if (!cluster.equals(this)) {
+                cluster.addEntry(data.get(i));
+                indexes.add(i);
+            }
         }
-        data.clear();
+        for (int i : indexes) {
+            data.remove(i);
+        }
     }
 }

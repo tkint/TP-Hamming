@@ -30,38 +30,6 @@ public class Entry {
         return id;
     }
 
-    public int getCouleur() {
-        return couleur;
-    }
-
-    public void setCouleur(int couleur) {
-        this.couleur = couleur;
-    }
-
-    public int getNoyaux() {
-        return noyaux;
-    }
-
-    public void setNoyaux(int noyaux) {
-        this.noyaux = noyaux;
-    }
-
-    public int getFlagelles() {
-        return flagelles;
-    }
-
-    public void setFlagelles(int flagelles) {
-        this.flagelles = flagelles;
-    }
-
-    public int getMembrane() {
-        return membrane;
-    }
-
-    public void setMembrane(int membrane) {
-        this.membrane = membrane;
-    }
-
     @Override
     public String toString() {
         return "Entry{" +
@@ -112,30 +80,14 @@ public class Entry {
     public Cluster getCloserCluster(List<Cluster> clusters) {
         Cluster cluster = clusters.get(0);
 
-        int maxDistance = 0;
+        int maxDistance = 4;
         for (Cluster c : clusters) {
-            if (getMaximumDistanceWithCluster(c) < c.getMaximumDistance()) {
-                return c;
-            }
-            if (maxDistance == 0 || getMaximumDistanceWithCluster(c) < maxDistance) {
+            if (getMaximumDistanceWithCluster(c) < maxDistance) {
                 maxDistance = getMaximumDistanceWithCluster(c);
                 cluster = c;
             }
         }
 
         return cluster;
-    }
-
-    public boolean isFarther(List<Entry> entries) {
-        boolean farther = false;
-
-        for (int i = 0; i < entries.size(); i++) {
-            for (int j = i + 1; j < entries.size(); j++) {
-                farther = calculateDistance(entries.get(i)) > entries.get(i).calculateDistance(entries.get(j));
-            }
-        }
-
-
-        return farther;
     }
 }
