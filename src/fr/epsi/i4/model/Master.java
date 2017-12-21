@@ -13,18 +13,6 @@ public class Master {
         data = new ArrayList<>();
     }
 
-    public List<Cluster> getClusters() {
-        return clusters;
-    }
-
-    public List<Entry> getData() {
-        return data;
-    }
-
-    public void setData(List<Entry> data) {
-        this.data = data;
-    }
-
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("Master: ");
@@ -47,73 +35,5 @@ public class Master {
             return entry;
         }
         return null;
-    }
-
-    public int getMaximumDistance() {
-        int distance = 0;
-
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = i + 1; j < data.size(); j++) {
-                distance = Math.max(distance, data.get(i).calculateDistance(data.get(j)));
-            }
-        }
-
-        return distance;
-    }
-
-    public Cluster getFirstEmptyCluster() {
-        for (Cluster c : clusters) {
-            if (c.isEmpty()) {
-                return c;
-            }
-        }
-
-        return clusters.get(0);
-    }
-
-    public Cluster getLastNotEmptyCluster() {
-        Cluster cluster = clusters.get(0);
-
-        for (Cluster c : clusters) {
-            if (c.isEmpty()) {
-                return cluster;
-            }
-            cluster = c;
-        }
-
-        return cluster;
-    }
-
-    public void displayDistances() {
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = i + 1; j < data.size(); j++) {
-                System.out.println("Distance between " + data.get(i).getId() + " and " + data.get(j).getId() + " : " + data.get(i).calculateDistance(data.get(j)));
-            }
-        }
-    }
-
-    private List<Cluster> getClustersExcept(Cluster cluster) {
-        List<Cluster> clusters = new ArrayList<>();
-        for (Cluster c : this.clusters) {
-            if (!c.equals(cluster)) {
-                clusters.add(c);
-            }
-        }
-        return clusters;
-    }
-
-    // TODO: Il faut redispatcher au fur et à mesure du remplissage des clusters
-    // Si la distance max entre une entry d'un cluster et un autre cluster est plus petite que la distance max
-    // Du cluster dans lequel elle est, alors bouger l'entry dans le cluster distant
-    public void dispatch(int n) {
-        for (int i = 0; i < n; i++) {
-            clusters.add(new Cluster());
-        }
-
-        for (Entry entry : data) {
-            Cluster cluster = entry.getCloserCluster(clusters);
-            cluster.addEntry(entry);
-            cluster.dispatch(clusters);
-        }
     }
 }

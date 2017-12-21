@@ -11,8 +11,6 @@ public class Main {
 
         generateData(master);
 
-        master.dispatch(2);
-
         System.out.println(master.toString());
 
 //        master.displayDistances();
