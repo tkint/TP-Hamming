@@ -6,11 +6,11 @@ import java.util.List;
 public class Master {
 
     private List<Cluster> clusters;
-    private List<Entry> data;
+    private List<Entry> entries;
 
     public Master() {
         clusters = new ArrayList<>();
-        data = new ArrayList<>();
+        entries = new ArrayList<>();
     }
 
     @Override
@@ -21,19 +21,36 @@ public class Master {
                     .append("\n---------------------------------")
                     .append("\nCluster ")
                     .append(i + 1);
-            for (Entry entry : clusters.get(i).getData()) {
-                stringBuilder
-                        .append("\n")
-                        .append(entry.toString());
+            for (int j = 0; j < clusters.get(i).getLines().length; j++) {
+                if (clusters.get(i).getLines()[j] != -1) {
+                    stringBuilder
+                            .append("\n")
+                            .append(entries.get(clusters.get(i).getLines()[j]).toString());
+                }
             }
         }
         return stringBuilder.toString();
     }
 
     public Entry addEntry(Entry entry) {
-        if (data.add(entry)) {
+        if (entries.add(entry)) {
             return entry;
         }
         return null;
+    }
+
+    public void generateClusters(int number) {
+        if (number > 0) {
+            this.clusters.add(new Cluster(this.entries.size()));
+            generateClusters(number - 1);
+        }
+    }
+
+    public void dispatchInClusters() {
+        for (Cluster cluster : clusters) {
+            if (cluster.isEmpty()) {
+
+            }
+        }
     }
 }

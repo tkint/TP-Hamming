@@ -11,6 +11,8 @@ public class Main {
 
         generateData(master);
 
+        master.generateClusters(2);
+
         System.out.println(master.toString());
 
 //        master.displayDistances();
