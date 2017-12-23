@@ -56,4 +56,54 @@ public class Entry {
 
         return distance;
     }
+
+    private int getMinimumDistanceWithCluster(Cluster cluster) {
+        int distance = 0;
+
+        for (Entry entry : cluster.getEntries()) {
+            distance = Math.min(distance, distanceHamming(entry));
+        }
+
+        return distance;
+    }
+
+    private int getMaximumDistanceWithCluster(Cluster cluster) {
+        int distance = 0;
+
+        for (Entry entry : cluster.getEntries()) {
+            distance = Math.max(distance, distanceHamming(entry));
+        }
+
+        return distance;
+    }
+
+    public Cluster getCloserCluster() {
+        int distance = 4;
+        Cluster cluster = null;
+        List<Cluster> clusters = Master.getInstance().getClusters();
+        for (Cluster c : clusters) {
+            int d = getMinimumDistanceWithCluster(c);
+            if (d < distance) {
+                distance = d;
+                cluster = c;
+            }
+        }
+        return cluster;
+    }
+
+    public Cluster getCloserClusterExcept(Cluster excluded) {
+        int distance = 4;
+        Cluster cluster = null;
+        List<Cluster> clusters = Master.getInstance().getClusters();
+        for (Cluster c : clusters) {
+            if (!c.equals(excluded)) {
+                int d = getMinimumDistanceWithCluster(c);
+                if (d < distance) {
+                    distance = d;
+                    cluster = c;
+                }
+            }
+        }
+        return cluster;
+    }
 }

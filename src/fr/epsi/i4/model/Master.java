@@ -5,12 +5,28 @@ import java.util.List;
 
 public class Master {
 
+    private static Master instance;
     private List<Cluster> clusters;
     private List<Entry> entries;
 
-    public Master() {
+    private Master() {
         clusters = new ArrayList<>();
         entries = new ArrayList<>();
+    }
+
+    public static Master getInstance() {
+        if (instance == null) {
+            instance = new Master();
+        }
+        return instance;
+    }
+
+    public List<Cluster> getClusters() {
+        return clusters;
+    }
+
+    public List<Entry> getEntries() {
+        return entries;
     }
 
     @Override
@@ -21,12 +37,10 @@ public class Master {
                     .append("\n---------------------------------")
                     .append("\nCluster ")
                     .append(i + 1);
-            for (int j = 0; j < clusters.get(i).getLines().length; j++) {
-                if (clusters.get(i).getLines()[j] != -1) {
+            for (Entry entry : clusters.get(i).getEntries()) {
                     stringBuilder
                             .append("\n")
-                            .append(entries.get(clusters.get(i).getLines()[j]).toString());
-                }
+                            .append(entry);
             }
         }
         return stringBuilder.toString();
@@ -41,16 +55,22 @@ public class Master {
 
     public void generateClusters(int number) {
         if (number > 0) {
-            this.clusters.add(new Cluster(this.entries.size()));
+            this.clusters.add(new Cluster());
             generateClusters(number - 1);
         }
     }
 
     public void dispatchInClusters() {
-        for (Cluster cluster : clusters) {
-            if (cluster.isEmpty()) {
+        int i = 0;
+        for (Entry entry : entries) {
+            Cluster cluster = clusters.get(i);
+            cluster.addEntry(entry);
 
+            Entry e = cluster.getFartherEntry();
+            if (e != null) {
+                cluster.extractEntry(e);
             }
+            i = (i + 1) % clusters.size();
         }
     }
 }

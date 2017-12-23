@@ -7,11 +7,13 @@ import fr.epsi.i4.model.Master;
 public class Main {
 
     public static void main(String[] args) {
-        Master master = new Master();
+        Master master = Master.getInstance();
 
         generateData(master);
 
         master.generateClusters(2);
+
+        master.dispatchInClusters();
 
         System.out.println(master.toString());
 

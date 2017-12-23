@@ -1,28 +1,52 @@
 package fr.epsi.i4.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Cluster {
 
-    private int[] lines;
+    private List<Entry> entries;
 
-    public Cluster(int size) {
-        lines = new int[size];
-        for (int i = 0; i < size; i++) {
-            lines[i] = -1;
-        }
+    public Cluster() {
+        this.entries = new ArrayList<>();
     }
 
-    public int[] getLines() {
-        return lines;
+    public List<Entry> getEntries() {
+        return entries;
     }
 
     public boolean isEmpty() {
-        boolean empty = true;
-        int i = 0;
-        while (i < lines.length && empty) {
-            if (lines[i] != -1) {
-                empty = false;
+        return entries.isEmpty();
+    }
+
+    public Entry addEntry(Entry entry) {
+        if (entries.add(entry)) {
+            return entry;
+        }
+        return null;
+    }
+
+    public Entry getFartherEntry() {
+        Entry entry = null;
+        int distance = 0;
+        for (int i = 0; i < entries.size(); i++) {
+            for (int j = i; j < entries.size(); j++) {
+                int d = entries.get(i).distanceHamming(entries.get(j));
+                if (d > distance) {
+                    distance = d;
+                    entry = entries.get(i);
+                }
             }
         }
-        return empty;
+        return entry;
+    }
+
+    public void extractEntry(Entry entry) {
+        if (entries.remove(entry)) {
+            Cluster cluster = entry.getCloserClusterExcept(this);
+            if (cluster != null) {
+                cluster.addEntry(entry);
+            }
+        }
     }
 }
