@@ -27,7 +27,6 @@ public class Cluster {
 
     public Entry addEntry(Entry entry) {
         if (entries.add(entry)) {
-            entry.setCluster(this);
             return entry;
         }
         return null;
@@ -41,59 +40,61 @@ public class Cluster {
         return entries.isEmpty();
     }
 
-    public int getInternMaximumDistance() {
+    /**
+     * Calcule la distance maximale avec un autre cluster
+     * @param cluster
+     * @return
+     */
+    public int getMaximumDistanceWithCluster(Cluster cluster) {
         int distance = 0;
-
-        for (int i = 0; i < entries.size(); i++) {
-            for (int j = i + 1; j < entries.size(); j++) {
-                distance = Math.max(distance, entries.get(i).calculateDistance(entries.get(j)));
-            }
-        }
-
-        return distance;
-    }
-
-    public void dispatch(List<Cluster> clusters) {
-        List<Integer> indexes = new ArrayList<>();
-        for (int i = 0; i < entries.size(); i++) {
-            Cluster cluster = entries.get(i).getClosestCluster(clusters);
-            if (!cluster.equals(this)) {
-                cluster.addEntry(entries.get(i));
-                indexes.add(i);
-            }
-        }
-        for (int i : indexes) {
-            entries.remove(i);
-        }
-    }
-
-    public Entry getClosestEntry(List<Entry> entries) {
-        if (isEmpty()) {
-            return entries.get(0);
-        }
-        int distance = 4;
-        Entry entry = null;
-        for (Entry e : entries) {
-            int d = e.getMinimumDistanceWithCluster(this);
-            if (d < distance) {
-                distance = d;
-                entry = e;
-            }
-        }
-        return entry;
-    }
-
-    public int getMinimumDistanceWithEntries(List<Entry> entries) {
-        if (isEmpty()) {
-            return 0;
-        }
-        int distance = 4;
-        for (Entry e : entries) {
-            int d = e.getMinimumDistanceWithCluster(this);
-            if (d < distance) {
-                distance = d;
+        // Pour chaque entrée de ce cluster
+        for (Entry entry1 : entries) {
+            // Pour chaque entrée du cluster distant
+            for (Entry entry2 : cluster.getEntries()) {
+                // On récupère la distance entre les deux entrées
+                int d = entry1.distanceHamming(entry2);
+                // Si elle est supérieure à la distance déjà enregistrée
+                if (d > distance) {
+                    // On enregistre la nouvelle distance
+                    distance = d;
+                }
             }
         }
         return distance;
+    }
+
+    /**
+     * Calcule la distance minimale avec un autre cluster
+     * @param cluster
+     * @return
+     */
+    public int getMinimumDistanceWithCluster(Cluster cluster) {
+        int distance = 5;
+        // Pour chaque entrée de ce cluster
+        for (Entry entry1 : entries) {
+            // Pour chaque entrée du cluster distant
+            for (Entry entry2 : cluster.getEntries()) {
+                // On récupère la distance entre les deux entrées
+                int d = entry1.distanceHamming(entry2);
+                // Si elle est inférieure à la distance déjà enregistrée
+                if (d < distance) {
+                    // On enregistre la nouvelle distance
+                    distance = d;
+                }
+            }
+        }
+        return distance;
+    }
+
+    /**
+     * Ajoute l'ensemble des entrées d'un cluster à ce cluster
+     * @param cluster
+     * @return
+     */
+    public Cluster merge(Cluster cluster) {
+        for (Entry entry : cluster.entries) {
+            addEntry(entry);
+        }
+        return this;
     }
 }

@@ -1,5 +1,7 @@
 package fr.epsi.i4.model;
 
+import javafx.util.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,12 @@ public class Master {
         return stringBuilder.toString();
     }
 
+    /**
+     * Ajoute une entrée
+     *
+     * @param entry
+     * @return
+     */
     public Entry addEntry(Entry entry) {
         if (entries.add(entry)) {
             return entry;
@@ -49,81 +57,77 @@ public class Master {
         return null;
     }
 
-    public int getMaximumDistance() {
-        int distance = 0;
-
+    /**
+     * Affiche l'ensemble des distances entre les entrées
+     */
+    public String displayDistances() {
+        StringBuilder stringBuilder = new StringBuilder("Distances:");
         for (int i = 0; i < entries.size(); i++) {
             for (int j = i + 1; j < entries.size(); j++) {
-                distance = Math.max(distance, entries.get(i).calculateDistance(entries.get(j)));
+                stringBuilder.append("\nDistance entre ")
+                        .append(entries.get(i).getId())
+                        .append(" et ")
+                        .append(entries.get(j).getId())
+                        .append(" : ")
+                        .append(entries.get(i).distanceHamming(entries.get(j)));
             }
         }
-
-        return distance;
+        return stringBuilder.toString();
     }
 
-    public Cluster getFirstEmptyCluster() {
-        for (Cluster c : clusters) {
-            if (c.isEmpty()) {
-                return c;
-            }
-        }
-
-        return null;
-    }
-
-    public Cluster getLastNotEmptyCluster() {
-        Cluster cluster = clusters.get(0);
-
-        for (Cluster c : clusters) {
-            if (c.isEmpty()) {
-                return cluster;
-            }
-            cluster = c;
-        }
-
-        return cluster;
-    }
-
-    public void displayDistances() {
-        for (int i = 0; i < entries.size(); i++) {
-            for (int j = i + 1; j < entries.size(); j++) {
-                System.out.println("Distance between " + entries.get(i).getId() + " and " + entries.get(j).getId() + " : " + entries.get(i).calculateDistance(entries.get(j)));
-            }
-        }
-    }
-
-    private List<Cluster> getClustersExcept(Cluster cluster) {
-        List<Cluster> clusters = new ArrayList<>();
-        for (Cluster c : this.clusters) {
-            if (!c.equals(cluster)) {
-                clusters.add(c);
-            }
-        }
-        return clusters;
-    }
-
-    // TODO: Il faut redispatcher au fur et à mesure du remplissage des clusters
-    // Si la distance max entre une entry d'un cluster et un autre cluster est plus petite que la distance max
-    // Du cluster dans lequel elle est, alors bouger l'entry dans le cluster distant
+    /**
+     * Divise les entrées en n clusters
+     *
+     * @param n
+     */
     public void dispatch(int n) {
         // Création des clusters
-        for (int i = 0; i < n; i++) {
-            clusters.add(new Cluster());
+        for (Entry entry : entries) {
+            Cluster cluster = new Cluster();
+            cluster.addEntry(entry);
+            clusters.add(cluster);
         }
 
-        // Pour chaque donnée
-        for (int i = 0; i < entries.size(); i++) {
-            // On prend le plus proche cluster
-            Cluster cluster = entries.get(i).getClosestCluster(clusters);
-            // Si l'entry est plus proche de ce cluster que de n'importe quelle autre entry
-            if (entries.get(i).getMinimumDistanceWithCluster(cluster) < entries.get(i).getMinimumDistanceWithEntries(entries)) {
-                if (getFirstEmptyCluster() != null) {
-                    cluster = getFirstEmptyCluster();
+        // Tant qu'on a pas le nombre de clusters désiré
+        while (clusters.size() > n) {
+            // On prend les deux clusters les plus proches l'un de l'autre
+            Pair<Cluster, Cluster> clusterPair = getClosestClusters();
+            if (clusterPair != null) {
+                // On les fusionne
+                Cluster cluster = clusterPair.getKey();
+                Cluster clusterToMerge = clusterPair.getValue();
+                cluster.merge(clusterToMerge);
+                // On supprime le cluster fusionné
+                clusters.remove(clusterToMerge);
+            }
+        }
+    }
+
+    /**
+     * Récupère les deux clusters les plus proches l'un de l'autre
+     * TODO: Définir un élément de pertinence pour éviter de toujours prendre la première paire en cas
+     * TODO: de < ou la dernière paire en cas de <= (nombre d'éléments différents?)
+     * @return
+     */
+    private Pair<Cluster, Cluster> getClosestClusters() {
+        Pair<Cluster, Cluster> clusterPair = null;
+
+        int distance = 5;
+        // Pour chaque cluster
+        for (int i = 0; i < clusters.size(); i++) {
+            // Pour tous les clusters suivants
+            for (int j = i + 1; j < clusters.size(); j++) {
+                // On récupère la distance maximale entre les clusters
+                int d = clusters.get(i).getMaximumDistanceWithCluster(clusters.get(j));
+                // Si elle est inférieure ou égale à la précédente distance max
+                if (d < distance) {
+                    distance = d;
+                    // Les deux clusters actuels sont les plus proches
+                    clusterPair = new Pair<>(clusters.get(i), clusters.get(j));
                 }
             }
-            cluster.addEntry(entries.get(i));
-            entries.remove(i);
-            i--;
         }
+
+        return clusterPair;
     }
 }

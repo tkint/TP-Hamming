@@ -1,6 +1,5 @@
 package fr.epsi.i4;
 
-import fr.epsi.i4.model.Cluster;
 import fr.epsi.i4.model.Entry;
 import fr.epsi.i4.model.Master;
 
@@ -15,34 +14,19 @@ public class Main {
 
         System.out.println(master.toString());
 
-//        master.displayDistances();
-
-//        System.out.println(master.getInternMaximumDistance());
+//        System.out.println(master.displayDistances());
     }
 
     public static void generateData(Master master) {
-        master.addEntry(new Entry(0, 2, 2, 0));
-        master.addEntry(new Entry(0, 1, 2, 0));
-        master.addEntry(new Entry(1, 2, 2, 0));
-        master.addEntry(new Entry(0, 2, 1, 0));
-        master.addEntry(new Entry(0, 2, 2, 1));
-        master.addEntry(new Entry(0, 1, 1, 1));
-        master.addEntry(new Entry(1, 2, 2, 1));
-        master.addEntry(new Entry(1, 1, 1, 0));
-        master.addEntry(new Entry(1, 1, 1, 1));
-        master.addEntry(new Entry(1, 2, 1, 1));
-    }
-
-    public static void generateDataBis(Master master) {
-        master.addEntry(new Entry(0, 2, 2, 0));
-        master.addEntry(new Entry(0, 1, 2, 0));
-        master.addEntry(new Entry(1, 2, 1, 1));
-        master.addEntry(new Entry(0, 2, 1, 0));
-        master.addEntry(new Entry(0, 2, 2, 1));
-        master.addEntry(new Entry(0, 1, 1, 1));
-        master.addEntry(new Entry(1, 2, 2, 1));
-        master.addEntry(new Entry(1, 1, 1, 0));
-        master.addEntry(new Entry(1, 1, 1, 1));
-//        master.addEntry(new Entry(1, 2, 1, 1));
+        master.addEntry(new Entry(1, 2, 2, 1)); // 1
+        master.addEntry(new Entry(1, 1, 2, 1)); // 2
+        master.addEntry(new Entry(2, 2, 2, 1)); // 3
+        master.addEntry(new Entry(1, 2, 1, 1)); // 4
+        master.addEntry(new Entry(1, 2, 2, 2)); // 5
+        master.addEntry(new Entry(1, 1, 1, 2)); // 6
+        master.addEntry(new Entry(2, 2, 2, 2)); // 7
+        master.addEntry(new Entry(2, 1, 1, 1)); // 8
+        master.addEntry(new Entry(2, 1, 1, 2)); // 9
+        master.addEntry(new Entry(2, 2, 1, 2)); // 10
     }
 }

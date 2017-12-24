@@ -1,14 +1,11 @@
 package fr.epsi.i4.model;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
 public class Entry {
 
     private int id;
     private static int nextId = 1;
-
-    private Cluster cluster;
 
     public int couleur;
     public int noyaux;
@@ -18,14 +15,6 @@ public class Entry {
     public Entry() {
         id = nextId;
         nextId++;
-    }
-
-    public Entry(int id, int couleur, int noyaux, int flagelles, int membrane) {
-        this.id = id;
-        this.couleur = couleur;
-        this.noyaux = noyaux;
-        this.flagelles = flagelles;
-        this.membrane = membrane;
     }
 
     public Entry(int couleur, int noyaux, int flagelles, int membrane) {
@@ -40,14 +29,6 @@ public class Entry {
         return id;
     }
 
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
-
     @Override
     public String toString() {
         return "Entry{" +
@@ -59,11 +40,13 @@ public class Entry {
                 '}';
     }
 
-    public Entry clone() {
-        return new Entry(id, couleur, noyaux, flagelles, membrane);
-    }
-
-    public int calculateDistance(Entry entry) {
+    /**
+     * Calcule la distance de Hamming avec une autre entrée
+     *
+     * @param entry
+     * @return
+     */
+    public int distanceHamming(Entry entry) {
         int distance = 0;
 
         try {
@@ -77,51 +60,5 @@ public class Entry {
         }
 
         return distance;
-    }
-
-    public int getMaximumDistanceWithCluster(Cluster cluster) {
-        int distance = 0;
-
-        for (Entry entry : cluster.getEntries()) {
-            distance = Math.max(distance, calculateDistance(entry));
-        }
-
-        return distance;
-    }
-
-    public int getMinimumDistanceWithCluster(Cluster cluster) {
-        int distance = 0;
-
-        for (Entry entry : cluster.getEntries()) {
-            distance = Math.min(distance, calculateDistance(entry));
-        }
-
-        return distance;
-    }
-
-    public int getMinimumDistanceWithEntries(List<Entry> entries) {
-        int distance = 0;
-
-        for (Entry entry : entries) {
-            if (!entry.equals(this)) {
-                distance = Math.min(distance, calculateDistance(entry));
-            }
-        }
-
-        return distance;
-    }
-
-    public Cluster getClosestCluster(List<Cluster> clusters) {
-        Cluster cluster = clusters.get(0);
-
-        int distance = 4;
-        for (Cluster c : clusters) {
-            if (getMaximumDistanceWithCluster(c) < distance) {
-                distance = getMaximumDistanceWithCluster(c);
-                cluster = c;
-            }
-        }
-
-        return cluster;
     }
 }
