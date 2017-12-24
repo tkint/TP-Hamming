@@ -6,23 +6,23 @@ import java.util.List;
 public class Master {
 
     private List<Cluster> clusters;
-    private List<Entry> data;
+    private List<Entry> entries;
 
     public Master() {
         clusters = new ArrayList<>();
-        data = new ArrayList<>();
+        entries = new ArrayList<>();
     }
 
     public List<Cluster> getClusters() {
         return clusters;
     }
 
-    public List<Entry> getData() {
-        return data;
+    public List<Entry> getEntries() {
+        return entries;
     }
 
-    public void setData(List<Entry> data) {
-        this.data = data;
+    public void setEntries(List<Entry> entries) {
+        this.entries = entries;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class Master {
                     .append("\n---------------------------------")
                     .append("\nCluster ")
                     .append(i + 1);
-            for (Entry entry : clusters.get(i).getData()) {
+            for (Entry entry : clusters.get(i).getEntries()) {
                 stringBuilder
                         .append("\n")
                         .append(entry.toString());
@@ -43,7 +43,7 @@ public class Master {
     }
 
     public Entry addEntry(Entry entry) {
-        if (data.add(entry)) {
+        if (entries.add(entry)) {
             return entry;
         }
         return null;
@@ -52,9 +52,9 @@ public class Master {
     public int getMaximumDistance() {
         int distance = 0;
 
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = i + 1; j < data.size(); j++) {
-                distance = Math.max(distance, data.get(i).calculateDistance(data.get(j)));
+        for (int i = 0; i < entries.size(); i++) {
+            for (int j = i + 1; j < entries.size(); j++) {
+                distance = Math.max(distance, entries.get(i).calculateDistance(entries.get(j)));
             }
         }
 
@@ -68,7 +68,7 @@ public class Master {
             }
         }
 
-        return clusters.get(0);
+        return null;
     }
 
     public Cluster getLastNotEmptyCluster() {
@@ -85,9 +85,9 @@ public class Master {
     }
 
     public void displayDistances() {
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = i + 1; j < data.size(); j++) {
-                System.out.println("Distance between " + data.get(i).getId() + " and " + data.get(j).getId() + " : " + data.get(i).calculateDistance(data.get(j)));
+        for (int i = 0; i < entries.size(); i++) {
+            for (int j = i + 1; j < entries.size(); j++) {
+                System.out.println("Distance between " + entries.get(i).getId() + " and " + entries.get(j).getId() + " : " + entries.get(i).calculateDistance(entries.get(j)));
             }
         }
     }
@@ -106,14 +106,34 @@ public class Master {
     // Si la distance max entre une entry d'un cluster et un autre cluster est plus petite que la distance max
     // Du cluster dans lequel elle est, alors bouger l'entry dans le cluster distant
     public void dispatch(int n) {
+        // Création des clusters
         for (int i = 0; i < n; i++) {
             clusters.add(new Cluster());
         }
 
-        for (Entry entry : data) {
-            Cluster cluster = entry.getCloserCluster(clusters);
-            cluster.addEntry(entry);
-            cluster.dispatch(clusters);
+        // Pour chaque donnée
+        clusters.get(0).addEntry(entries.get(0));
+        for (int i = 1; i < entries.size(); i++) {
+            // On récupère le cluster le plus proche
+            Cluster cluster = entries.get(i).getCloserCluster(clusters);
+            // Si l'entry est la plus proche des entries
+            if (entries.get(i).equals(cluster.getClosestEntry(entries))) {
+                // On l'ajoute à ce cluster et on la retire des entries
+                cluster.addEntry(entries.get(i).clone());
+//                entries.remove(i);
+            }
+            // Sinon
+            else {
+                // On récupère le premier cluster vide
+//                cluster = getFirstEmptyCluster();
+//                if (cluster == null) {
+//                    cluster = entries.get(i).getCloserCluster(clusters);
+//                }
+                // On l'ajoute à ce cluster et on la retire des entries
+                cluster.addEntry(entries.get(i).clone());
+//                entries.remove(i);
+            }
         }
+
     }
 }

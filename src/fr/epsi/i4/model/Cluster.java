@@ -1,69 +1,52 @@
 package fr.epsi.i4.model;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class Cluster {
 
-    private List<Entry> data;
-    private List<Integer> distances;
+    private List<Entry> entries;
 
     public Cluster() {
-        data = new ArrayList<>();
-        distances = new ArrayList<>();
+        entries = new ArrayList<>();
     }
 
-    public List<Entry> getData() {
-        return data;
+    public List<Entry> getEntries() {
+        return entries;
     }
 
-    public void setData(List<Entry> data) {
-        this.data = data;
+    public void setEntries(List<Entry> entries) {
+        this.entries = entries;
     }
 
     @Override
     public String toString() {
         return "Cluster{" +
-                "data=" + data +
+                "entries=" + entries +
                 '}';
     }
 
     public Entry addEntry(Entry entry) {
-        if (data.add(entry)) {
-            for (Entry e : data) {
-                distances.add(e.calculateDistance(entry));
-            }
+        if (entries.add(entry)) {
+            entry.setCluster(this);
             return entry;
         }
         return null;
     }
 
-    public int countDistanceOccurences(int distance) {
-        int count = 0;
-
-        for (int d : distances) {
-            if (d == distance) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
     public Entry removeEntry(int id) {
-        return data.remove(id);
+        return entries.remove(id);
     }
 
     public boolean isEmpty() {
-        return data.isEmpty();
+        return entries.isEmpty();
     }
 
     public int getInternMaximumDistance() {
         int distance = 0;
 
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = i + 1; j < data.size(); j++) {
-                distance = Math.max(distance, data.get(i).calculateDistance(data.get(j)));
+        for (int i = 0; i < entries.size(); i++) {
+            for (int j = i + 1; j < entries.size(); j++) {
+                distance = Math.max(distance, entries.get(i).calculateDistance(entries.get(j)));
             }
         }
 
@@ -72,15 +55,31 @@ public class Cluster {
 
     public void dispatch(List<Cluster> clusters) {
         List<Integer> indexes = new ArrayList<>();
-        for (int i = 0; i < data.size(); i++) {
-            Cluster cluster = data.get(i).getCloserCluster(clusters);
+        for (int i = 0; i < entries.size(); i++) {
+            Cluster cluster = entries.get(i).getCloserCluster(clusters);
             if (!cluster.equals(this)) {
-                cluster.addEntry(data.get(i));
+                cluster.addEntry(entries.get(i));
                 indexes.add(i);
             }
         }
         for (int i : indexes) {
-            data.remove(i);
+            entries.remove(i);
         }
+    }
+
+    public Entry getClosestEntry(List<Entry> entries) {
+        if (isEmpty()) {
+            return entries.get(0);
+        }
+        int distance = 4;
+        Entry entry = null;
+        for (Entry e : entries) {
+            int d = e.getMinimumDistanceWithCluster(this);
+            if (d < distance) {
+                distance = d;
+                entry = e;
+            }
+        }
+        return entry;
     }
 }

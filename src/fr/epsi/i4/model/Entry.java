@@ -8,6 +8,8 @@ public class Entry {
     private int id;
     private static int nextId = 1;
 
+    private Cluster cluster;
+
     public int couleur;
     public int noyaux;
     public int flagelles;
@@ -16,6 +18,14 @@ public class Entry {
     public Entry() {
         id = nextId;
         nextId++;
+    }
+
+    public Entry(int id, int couleur, int noyaux, int flagelles, int membrane) {
+        this.id = id;
+        this.couleur = couleur;
+        this.noyaux = noyaux;
+        this.flagelles = flagelles;
+        this.membrane = membrane;
     }
 
     public Entry(int couleur, int noyaux, int flagelles, int membrane) {
@@ -30,6 +40,14 @@ public class Entry {
         return id;
     }
 
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
+    }
+
     @Override
     public String toString() {
         return "Entry{" +
@@ -39,6 +57,10 @@ public class Entry {
                 ", flagelles=" + flagelles +
                 ", membrane=" + membrane +
                 '}';
+    }
+
+    public Entry clone() {
+        return new Entry(id, couleur, noyaux, flagelles, membrane);
     }
 
     public int calculateDistance(Entry entry) {
@@ -60,7 +82,7 @@ public class Entry {
     public int getMaximumDistanceWithCluster(Cluster cluster) {
         int distance = 0;
 
-        for (Entry entry : cluster.getData()) {
+        for (Entry entry : cluster.getEntries()) {
             distance = Math.max(distance, calculateDistance(entry));
         }
 
@@ -70,7 +92,7 @@ public class Entry {
     public int getMinimumDistanceWithCluster(Cluster cluster) {
         int distance = 0;
 
-        for (Entry entry : cluster.getData()) {
+        for (Entry entry : cluster.getEntries()) {
             distance = Math.min(distance, calculateDistance(entry));
         }
 
