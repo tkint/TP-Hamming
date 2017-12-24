@@ -99,13 +99,25 @@ public class Entry {
         return distance;
     }
 
-    public Cluster getCloserCluster(List<Cluster> clusters) {
+    public int getMinimumDistanceWithEntries(List<Entry> entries) {
+        int distance = 0;
+
+        for (Entry entry : entries) {
+            if (!entry.equals(this)) {
+                distance = Math.min(distance, calculateDistance(entry));
+            }
+        }
+
+        return distance;
+    }
+
+    public Cluster getClosestCluster(List<Cluster> clusters) {
         Cluster cluster = clusters.get(0);
 
-        int maxDistance = 4;
+        int distance = 4;
         for (Cluster c : clusters) {
-            if (getMaximumDistanceWithCluster(c) < maxDistance) {
-                maxDistance = getMaximumDistanceWithCluster(c);
+            if (getMaximumDistanceWithCluster(c) < distance) {
+                distance = getMaximumDistanceWithCluster(c);
                 cluster = c;
             }
         }

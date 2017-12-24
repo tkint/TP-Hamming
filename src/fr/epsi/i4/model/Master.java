@@ -112,28 +112,18 @@ public class Master {
         }
 
         // Pour chaque donnée
-        clusters.get(0).addEntry(entries.get(0));
-        for (int i = 1; i < entries.size(); i++) {
-            // On récupère le cluster le plus proche
-            Cluster cluster = entries.get(i).getCloserCluster(clusters);
-            // Si l'entry est la plus proche des entries
-            if (entries.get(i).equals(cluster.getClosestEntry(entries))) {
-                // On l'ajoute à ce cluster et on la retire des entries
-                cluster.addEntry(entries.get(i).clone());
-//                entries.remove(i);
+        for (int i = 0; i < entries.size(); i++) {
+            // On prend le plus proche cluster
+            Cluster cluster = entries.get(i).getClosestCluster(clusters);
+            // Si l'entry est plus proche de ce cluster que de n'importe quelle autre entry
+            if (entries.get(i).getMinimumDistanceWithCluster(cluster) < entries.get(i).getMinimumDistanceWithEntries(entries)) {
+                if (getFirstEmptyCluster() != null) {
+                    cluster = getFirstEmptyCluster();
+                }
             }
-            // Sinon
-            else {
-                // On récupère le premier cluster vide
-//                cluster = getFirstEmptyCluster();
-//                if (cluster == null) {
-//                    cluster = entries.get(i).getCloserCluster(clusters);
-//                }
-                // On l'ajoute à ce cluster et on la retire des entries
-                cluster.addEntry(entries.get(i).clone());
-//                entries.remove(i);
-            }
+            cluster.addEntry(entries.get(i));
+            entries.remove(i);
+            i--;
         }
-
     }
 }

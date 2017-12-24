@@ -56,7 +56,7 @@ public class Cluster {
     public void dispatch(List<Cluster> clusters) {
         List<Integer> indexes = new ArrayList<>();
         for (int i = 0; i < entries.size(); i++) {
-            Cluster cluster = entries.get(i).getCloserCluster(clusters);
+            Cluster cluster = entries.get(i).getClosestCluster(clusters);
             if (!cluster.equals(this)) {
                 cluster.addEntry(entries.get(i));
                 indexes.add(i);
@@ -81,5 +81,19 @@ public class Cluster {
             }
         }
         return entry;
+    }
+
+    public int getMinimumDistanceWithEntries(List<Entry> entries) {
+        if (isEmpty()) {
+            return 0;
+        }
+        int distance = 4;
+        for (Entry e : entries) {
+            int d = e.getMinimumDistanceWithCluster(this);
+            if (d < distance) {
+                distance = d;
+            }
+        }
+        return distance;
     }
 }
