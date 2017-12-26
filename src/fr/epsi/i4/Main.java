@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         Master master = new Master();
 
-        generateData(master);
+        generateDataBis(master);
 
         master.dispatch(2, false);
 
@@ -28,5 +28,18 @@ public class Main {
         master.addEntry(new Entry(8, 2, 1, 1, 1)); // 8
         master.addEntry(new Entry(9, 2, 1, 1, 2)); // 9
         master.addEntry(new Entry(10, 2, 2, 1, 2)); // 10
+    }
+
+    public static void generateDataBis(Master master) {
+        master.addEntry(new Entry(1, 0, 2, 2, 0));
+        master.addEntry(new Entry(2, 0, 1, 2, 0));
+        master.addEntry(new Entry(3, 1, 2, 1, 1));
+        master.addEntry(new Entry(4, 0, 2, 1, 0));
+        master.addEntry(new Entry(5, 0, 2, 2, 1));
+        master.addEntry(new Entry(6, 0, 1, 1, 1));
+        master.addEntry(new Entry(7, 1, 2, 2, 1));
+        master.addEntry(new Entry(8, 1, 1, 1, 0));
+        master.addEntry(new Entry(9, 1, 1, 1, 1));
+        master.addEntry(new Entry(10, 1, 2, 1, 1));
     }
 }
