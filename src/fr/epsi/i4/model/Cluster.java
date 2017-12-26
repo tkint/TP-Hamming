@@ -1,6 +1,7 @@
 package fr.epsi.i4.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Cluster {
 
@@ -42,6 +43,7 @@ public class Cluster {
 
     /**
      * Calcule la distance maximale avec un autre cluster
+     *
      * @param cluster
      * @return
      */
@@ -65,6 +67,7 @@ public class Cluster {
 
     /**
      * Calcule la distance minimale avec un autre cluster
+     *
      * @param cluster
      * @return
      */
@@ -87,7 +90,27 @@ public class Cluster {
     }
 
     /**
+     * Calcule la distance cumulée avec un autre cluster
+     *
+     * @param cluster
+     * @return
+     */
+    public int getCumulatedDistanceWithCluster(Cluster cluster) {
+        int distance = 0;
+        // Pour chaque entrée de ce cluster
+        for (Entry entry1 : entries) {
+            // Pour chaque entrée du cluster distant
+            for (Entry entry2 : cluster.getEntries()) {
+                // On ajoute la distance entre les deux entrées
+                distance += entry1.distanceHamming(entry2);
+            }
+        }
+        return distance;
+    }
+
+    /**
      * Ajoute l'ensemble des entrées d'un cluster à ce cluster
+     *
      * @param cluster
      * @return
      */

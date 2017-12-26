@@ -80,7 +80,7 @@ public class Master {
      *
      * @param n
      */
-    public void dispatch(int n) {
+    public void dispatch(int n, boolean stepByStep) {
         // Création des clusters
         for (Entry entry : entries) {
             Cluster cluster = new Cluster();
@@ -88,18 +88,23 @@ public class Master {
             clusters.add(cluster);
         }
 
+        int step = 0;
         // Tant qu'on a pas le nombre de clusters désiré
         while (clusters.size() > n) {
+            if (stepByStep) {
+                System.out.println("############### Step " + step + " ###############");
+                System.out.println(toString());
+                step++;
+            }
+
             // On prend les deux clusters les plus proches l'un de l'autre
             Pair<Cluster, Cluster> clusterPair = getClosestClusters();
-            if (clusterPair != null) {
-                // On les fusionne
-                Cluster cluster = clusterPair.getKey();
-                Cluster clusterToMerge = clusterPair.getValue();
-                cluster.merge(clusterToMerge);
-                // On supprime le cluster fusionné
-                clusters.remove(clusterToMerge);
-            }
+            // On les fusionne
+            Cluster cluster = clusterPair.getKey();
+            Cluster clusterToMerge = clusterPair.getValue();
+            cluster.merge(clusterToMerge);
+            // On supprime le cluster fusionné
+            clusters.remove(clusterToMerge);
         }
     }
 
@@ -107,27 +112,31 @@ public class Master {
      * Récupère les deux clusters les plus proches l'un de l'autre
      * TODO: Définir un élément de pertinence pour éviter de toujours prendre la première paire en cas
      * TODO: de < ou la dernière paire en cas de <= (nombre d'éléments différents?)
+     *
      * @return
      */
     private Pair<Cluster, Cluster> getClosestClusters() {
-        Pair<Cluster, Cluster> clusterPair = null;
-
         int distance = 5;
+        int d;
+        int clusterIndex = 0;
+        int clusterToMergeIndex = 0;
         // Pour chaque cluster
         for (int i = 0; i < clusters.size(); i++) {
             // Pour tous les clusters suivants
             for (int j = i + 1; j < clusters.size(); j++) {
                 // On récupère la distance maximale entre les clusters
-                int d = clusters.get(i).getMaximumDistanceWithCluster(clusters.get(j));
-                // Si elle est inférieure ou égale à la précédente distance max
-                if (d < distance) {
+                d = clusters.get(i).getMaximumDistanceWithCluster(clusters.get(j));
+                // Si la distance maximale est plus petite que la précédente enregistrée
+                if (d <= distance) {
+                    // On mets à jour la distance
                     distance = d;
-                    // Les deux clusters actuels sont les plus proches
-                    clusterPair = new Pair<>(clusters.get(i), clusters.get(j));
+                    // On récupère les index
+                    clusterIndex = i;
+                    clusterToMergeIndex = j;
                 }
             }
         }
 
-        return clusterPair;
+        return new Pair<>(clusters.get(clusterIndex), clusters.get(clusterToMergeIndex));
     }
 }

@@ -4,13 +4,14 @@ import java.lang.reflect.Field;
 
 public class Entry {
 
-    private int id;
     private static int nextId = 1;
 
     public int couleur;
     public int noyaux;
     public int flagelles;
     public int membrane;
+
+    private int id;
 
     public Entry() {
         id = nextId;
@@ -19,6 +20,14 @@ public class Entry {
 
     public Entry(int couleur, int noyaux, int flagelles, int membrane) {
         this();
+        this.couleur = couleur;
+        this.noyaux = noyaux;
+        this.flagelles = flagelles;
+        this.membrane = membrane;
+    }
+
+    public Entry(int id, int couleur, int noyaux, int flagelles, int membrane) {
+        this.id = id;
         this.couleur = couleur;
         this.noyaux = noyaux;
         this.flagelles = flagelles;
