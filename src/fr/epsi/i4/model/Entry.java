@@ -70,4 +70,25 @@ public class Entry {
 
         return distance;
     }
+
+    /**
+     * Calcule la distance maximale avec un autre cluster
+     *
+     * @param cluster
+     * @return
+     */
+    public int getMaximumDistanceWithCluster(Cluster cluster) {
+        int distance = 0;
+        // Pour chaque entrée du cluster distant
+        for (Entry entry : cluster.getEntries()) {
+            // On récupère la distance entre les deux entrées
+            int d = distanceHamming(entry);
+            // Si elle est supérieure à la distance déjà enregistrée
+            if (d > distance) {
+                // On enregistre la nouvelle distance
+                distance = d;
+            }
+        }
+        return distance;
+    }
 }

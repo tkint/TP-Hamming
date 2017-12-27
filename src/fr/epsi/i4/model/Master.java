@@ -80,23 +80,59 @@ public class Master {
      *
      * @param n
      */
-    public void dispatch(int n, boolean stepByStep) {
+    public void dispatch(int n) {
+        initDispatch();
+        cleanClusters();
+        finalizeDispatch(n);
+        finalizeCleanClusters();
+    }
+
+    /**
+     * Initialise l'algorithme
+     * On défini que chaque entry est son propre cluster
+     * On y adjoint toutes les entries partageant la même distance avec ce cluster
+     */
+    private void initDispatch() {
         // Création des clusters
         for (Entry entry : entries) {
             Cluster cluster = new Cluster();
             cluster.addEntry(entry);
+            // Ajout des entries les plus proches
+            cluster.addClosestEntries(entries);
             clusters.add(cluster);
         }
+    }
 
-        int step = 0;
+    /**
+     * Nettoie les clusters en supprimant les doublons
+     */
+    private void cleanClusters() {
+        List<Cluster> clustersToRemove = new ArrayList<>();
+        for (int i = 0; i < clusters.size(); i++) {
+            for (int j = 0; j < clusters.size(); j++) {
+                if (i != j) {
+                    if (clusters.get(i).contains(clusters.get(j))) {
+                        clustersToRemove.add(clusters.get(j));
+                    }
+                    if (clusters.get(j).contains(clusters.get(i))) {
+                        clustersToRemove.add(clusters.get(i));
+                    }
+                }
+            }
+        }
+        for (Cluster cluster : clustersToRemove) {
+            clusters.remove(cluster);
+        }
+    }
+
+    /**
+     * Fusionne les clusters jusqu'à en obtenir que le nombre nécessaire
+     *
+     * @param n
+     */
+    private void finalizeDispatch(int n) {
         // Tant qu'on a pas le nombre de clusters désiré
         while (clusters.size() > n) {
-            if (stepByStep) {
-                System.out.println("############### Step " + step + " ###############");
-                System.out.println(toString());
-                step++;
-            }
-
             // On prend les deux clusters les plus proches l'un de l'autre
             Pair<Cluster, Cluster> clusterPair = getClosestClusters();
             // On les fusionne
@@ -109,9 +145,44 @@ public class Master {
     }
 
     /**
+     * Nettoie les doublons
+     */
+    private void finalizeCleanClusters() {
+        // Pour chaque cluster
+        for (int i = 0; i < clusters.size(); i++) {
+            // Pour chaque autre cluster
+            for (int j = 0; j < clusters.size(); j++) {
+                if (i != j) {
+                    // Pour chaque entry du premier cluster
+                    for (int k = 0; k < clusters.get(i).getEntries().size(); k++) {
+                        Entry entry = clusters.get(i).getEntries().get(k);
+                        // Si l'entry est présente dans le deuxième cluster
+                        if (clusters.get(j).contains(entry)) {
+                            // Si l'entry est plus proche du premier que du second
+                            if (entry.getMaximumDistanceWithCluster(clusters.get(i)) < entry.getMaximumDistanceWithCluster(clusters.get(j))) {
+                                // On la supprime du second
+                                clusters.get(j).removeEntry(entry);
+                                // Si l'entry est plus proche du second que du premier
+                            } else if (entry.getMaximumDistanceWithCluster(clusters.get(i)) > entry.getMaximumDistanceWithCluster(clusters.get(j))) {
+                                // On la supprime du premier
+                                clusters.get(i).removeEntry(entry);
+                            } else {
+                                // Sinon, on en supprime au hasard
+                                if (Math.random() > 0.5) {
+                                    clusters.get(j).removeEntry(entry);
+                                } else {
+                                    clusters.get(i).removeEntry(entry);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Récupère les deux clusters les plus proches l'un de l'autre
-     * TODO: Définir un élément de pertinence pour éviter de toujours prendre la première paire en cas
-     * TODO: de < ou la dernière paire en cas de <= (nombre d'éléments différents?)
      *
      * @return
      */
