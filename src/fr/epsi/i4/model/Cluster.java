@@ -26,6 +26,12 @@ public class Cluster {
                 '}';
     }
 
+    /**
+     * Ajoute l'entry au cluster
+     *
+     * @param entry Entry
+     * @return Entry
+     */
     public Entry addEntry(Entry entry) {
         if (entries.add(entry)) {
             return entry;
@@ -33,23 +39,21 @@ public class Cluster {
         return null;
     }
 
-    public Entry removeEntry(int id) {
-        return entries.remove(id);
-    }
-
+    /**
+     * Retire l'entry du cluster
+     *
+     * @param entry Entry
+     * @return boolean
+     */
     public boolean removeEntry(Entry entry) {
         return entries.remove(entry);
-    }
-
-    public boolean isEmpty() {
-        return entries.isEmpty();
     }
 
     /**
      * Calcule la distance maximale avec un autre cluster
      *
-     * @param cluster
-     * @return
+     * @param cluster Cluster
+     * @return int
      */
     public int getMaximumDistanceWithCluster(Cluster cluster) {
         int distance = 0;
@@ -70,53 +74,10 @@ public class Cluster {
     }
 
     /**
-     * Calcule la distance minimale avec un autre cluster
-     *
-     * @param cluster
-     * @return
-     */
-    public int getMinimumDistanceWithCluster(Cluster cluster) {
-        int distance = 5;
-        // Pour chaque entrée de ce cluster
-        for (Entry entry1 : entries) {
-            // Pour chaque entrée du cluster distant
-            for (Entry entry2 : cluster.getEntries()) {
-                // On récupère la distance entre les deux entrées
-                int d = entry1.distanceHamming(entry2);
-                // Si elle est inférieure à la distance déjà enregistrée
-                if (d < distance) {
-                    // On enregistre la nouvelle distance
-                    distance = d;
-                }
-            }
-        }
-        return distance;
-    }
-
-    /**
-     * Calcule la distance cumulée avec un autre cluster
-     *
-     * @param cluster
-     * @return
-     */
-    public int getCumulatedDistanceWithCluster(Cluster cluster) {
-        int distance = 0;
-        // Pour chaque entrée de ce cluster
-        for (Entry entry1 : entries) {
-            // Pour chaque entrée du cluster distant
-            for (Entry entry2 : cluster.getEntries()) {
-                // On ajoute la distance entre les deux entrées
-                distance += entry1.distanceHamming(entry2);
-            }
-        }
-        return distance;
-    }
-
-    /**
      * Ajoute l'ensemble des entrées d'un cluster à ce cluster
      *
-     * @param cluster
-     * @return
+     * @param cluster Cluster
+     * @return Cluster
      */
     public Cluster merge(Cluster cluster) {
         for (int i = 0; i < cluster.entries.size(); i++) {
@@ -127,18 +88,12 @@ public class Cluster {
         return this;
     }
 
-    public boolean equals(Cluster cluster) {
-        boolean equals = true;
-        if (entries.size() == cluster.entries.size()) {
-            for (Entry entry : cluster.entries) {
-                equals &= contains(entry);
-            }
-        } else {
-            equals = false;
-        }
-        return equals;
-    }
-
+    /**
+     * Vérifie si le cluster contient l'entry
+     *
+     * @param entry Entry
+     * @return boolean
+     */
     public boolean contains(Entry entry) {
         boolean contains = false;
         int i = 0;
@@ -152,6 +107,12 @@ public class Cluster {
         return contains;
     }
 
+    /**
+     * Vérifie si le cluster contient le cluster distant
+     *
+     * @param cluster Cluster
+     * @return boolean
+     */
     public boolean contains(Cluster cluster) {
         boolean contains = true;
         for (Entry entry : cluster.entries) {
@@ -160,12 +121,13 @@ public class Cluster {
         return contains;
     }
 
-    public void clearExceptFirst() {
-        entries = entries.subList(0, 1);
-    }
-
+    /**
+     * Ajoute les entry les plus proches
+     *
+     * @param entriesToAdd List<Entry>
+     */
     public void addClosestEntries(List<Entry> entriesToAdd) {
-        int distance = 5;
+        int distance = Entry.getMaxSize();
         int d;
         // Pour chaque entry
         for (int i = 0; i < entriesToAdd.size(); i++) {
@@ -177,8 +139,8 @@ public class Cluster {
                 if (d < distance) {
                     // On mets à jour la distance
                     distance = d;
-                    // On vide le cluster
-                    clearExceptFirst();
+                    // On vide le cluster sauf la première donnée car c'est celle de référence
+                    entries = entries.subList(0, 1);
                     // On ajoute l'élément actuel
                     addEntry(entriesToAdd.get(i));
                     // Sinon, si la distance est égale

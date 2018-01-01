@@ -15,18 +15,6 @@ public class Master {
         entries = new ArrayList<>();
     }
 
-    public List<Cluster> getClusters() {
-        return clusters;
-    }
-
-    public List<Entry> getEntries() {
-        return entries;
-    }
-
-    public void setEntries(List<Entry> entries) {
-        this.entries = entries;
-    }
-
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("Master: ");
@@ -47,8 +35,8 @@ public class Master {
     /**
      * Ajoute une entrée
      *
-     * @param entry
-     * @return
+     * @param entry Entry
+     * @return Entry
      */
     public Entry addEntry(Entry entry) {
         if (entries.add(entry)) {
@@ -58,7 +46,9 @@ public class Master {
     }
 
     /**
-     * Affiche l'ensemble des distances entre les entrées
+     * Retourne l'ensemble des distances entre les entrées
+     *
+     * @return String
      */
     public String displayDistances() {
         StringBuilder stringBuilder = new StringBuilder("Distances:");
@@ -78,12 +68,53 @@ public class Master {
     /**
      * Divise les entrées en n clusters
      *
-     * @param n
+     * L'algorithme fonctionne en quatre étapes
+     * - Initialisation:
+     *     On défini que chaque entry est un cluster
+     *     On y adjoint toutes les entries partageant la même distance avec ce cluster
+     *     On a donc:
+     *       1 2 3 4 5
+     *       2 1
+     *       3 1 7
+     *       4 1
+     *       5 1 7
+     *       6 9
+     *       7 3 5 10
+     *       8 9
+     *       9 6 8 10
+     *       10 7 9
+     * - Premier nettoyage:
+     *     On supprime les clusters en trop, ceux qui sont contenus dans d'autres clusters
+     *     On a donc:
+     *       1 2 3 4 5
+     *       3 1 7
+     *       5 1 7
+     *       7 3 5 10
+     *       9 6 8 10
+     *       10 7 9
+     * - Fusion:
+     *     On fusionne les clusters les plus proches les uns des autres jusqu'à n'avoir plus que n clusters
+     *     On a donc:
+     *       1 2 3 4 5 7 10 9
+     *       9 6 8 10
+     * - Deuxième nettoyage:
+     *     On supprime les doublons des clusters desquels ils sont le plus éloigné
+     *     A noter que si une entry est équidistante avec plusieurs clusters, un aléaoire se joue pour décider dans
+     *     lequel la laisser. Les résultats pour n > 3 sont donc susceptibles de changer
+     *     On a donc:
+     *       1 2 3 4 5 7
+     *       9 6 8 10
+     *
+     * @param n int
      */
     public void dispatch(int n) {
+        // Initialisation
         initDispatch();
+        // Premier nettoyage (suppression des clusters en trop)
         cleanClusters();
+        // Fusion jusqu'à n'avoir plus que n clusters
         finalizeDispatch(n);
+        // Deuxième nettoyage (dédoublonnage)
         finalizeCleanClusters();
     }
 
@@ -108,18 +139,24 @@ public class Master {
      */
     private void cleanClusters() {
         List<Cluster> clustersToRemove = new ArrayList<>();
+        // Pour chaque cluster
         for (int i = 0; i < clusters.size(); i++) {
+            // Pour chaque cluster
             for (int j = 0; j < clusters.size(); j++) {
+                // Si on est pas sur le même cluster
                 if (i != j) {
+                    // Si le second cluster est dans le premier, on l'ajoute à la liste
                     if (clusters.get(i).contains(clusters.get(j))) {
                         clustersToRemove.add(clusters.get(j));
                     }
+                    // Si le premier cluster est dans le second, on l'ajoute à la liste
                     if (clusters.get(j).contains(clusters.get(i))) {
                         clustersToRemove.add(clusters.get(i));
                     }
                 }
             }
         }
+        // On retire les clusters
         for (Cluster cluster : clustersToRemove) {
             clusters.remove(cluster);
         }
@@ -128,7 +165,7 @@ public class Master {
     /**
      * Fusionne les clusters jusqu'à en obtenir que le nombre nécessaire
      *
-     * @param n
+     * @param n int
      */
     private void finalizeDispatch(int n) {
         // Tant qu'on a pas le nombre de clusters désiré
@@ -148,6 +185,8 @@ public class Master {
      * Nettoie les doublons
      */
     private void finalizeCleanClusters() {
+        int distanceCluster1;
+        int distanceCluster2;
         // Pour chaque cluster
         for (int i = 0; i < clusters.size(); i++) {
             // Pour chaque autre cluster
@@ -158,12 +197,15 @@ public class Master {
                         Entry entry = clusters.get(i).getEntries().get(k);
                         // Si l'entry est présente dans le deuxième cluster
                         if (clusters.get(j).contains(entry)) {
+                            // On récupère les distances max avec les deux clusters
+                            distanceCluster1 = entry.getMaximumDistanceWithCluster(clusters.get(i));
+                            distanceCluster2 = entry.getMaximumDistanceWithCluster(clusters.get(j));
                             // Si l'entry est plus proche du premier que du second
-                            if (entry.getMaximumDistanceWithCluster(clusters.get(i)) < entry.getMaximumDistanceWithCluster(clusters.get(j))) {
+                            if (distanceCluster1 < distanceCluster2) {
                                 // On la supprime du second
                                 clusters.get(j).removeEntry(entry);
                                 // Si l'entry est plus proche du second que du premier
-                            } else if (entry.getMaximumDistanceWithCluster(clusters.get(i)) > entry.getMaximumDistanceWithCluster(clusters.get(j))) {
+                            } else if (distanceCluster1 > distanceCluster2) {
                                 // On la supprime du premier
                                 clusters.get(i).removeEntry(entry);
                             } else {
@@ -184,10 +226,10 @@ public class Master {
     /**
      * Récupère les deux clusters les plus proches l'un de l'autre
      *
-     * @return
+     * @return Pair
      */
     private Pair<Cluster, Cluster> getClosestClusters() {
-        int distance = 5;
+        int distance = Entry.getMaxSize();
         int d;
         int clusterIndex = 0;
         int clusterToMergeIndex = 0;
@@ -198,7 +240,7 @@ public class Master {
                 // On récupère la distance maximale entre les clusters
                 d = clusters.get(i).getMaximumDistanceWithCluster(clusters.get(j));
                 // Si la distance maximale est plus petite que la précédente enregistrée
-                if (d <= distance) {
+                if (d < distance) {
                     // On mets à jour la distance
                     distance = d;
                     // On récupère les index
