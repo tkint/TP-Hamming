@@ -22,11 +22,12 @@ public class Master {
             stringBuilder
                     .append("\n---------------------------------")
                     .append("\nCluster ")
-                    .append(i + 1);
+                    .append(i + 1)
+                    .append("\n");
             for (Entry entry : clusters.get(i).getEntries()) {
                 stringBuilder
-                        .append("\n")
-                        .append(entry.toString());
+                        .append(entry.toString())
+                        .append("\n");
             }
         }
         return stringBuilder.toString();
@@ -67,55 +68,55 @@ public class Master {
 
     /**
      * Divise les entrées en n clusters
-     *
+     * <p>
      * L'algorithme fonctionne en quatre étapes
      * - Initialisation:
-     *     On défini que chaque entry est un cluster
-     *     On y adjoint toutes les entries partageant la même distance avec ce cluster
-     *     On a donc:
-     *       1 2 3 4 5
-     *       2 1
-     *       3 1 7
-     *       4 1
-     *       5 1 7
-     *       6 9
-     *       7 3 5 10
-     *       8 9
-     *       9 6 8 10
-     *       10 7 9
+     * On défini que chaque entry est un cluster
+     * On y adjoint toutes les entries partageant la même distance avec ce cluster
+     * On a donc:
+     * 1 2 3 4 5
+     * 2 1
+     * 3 1 7
+     * 4 1
+     * 5 1 7
+     * 6 9
+     * 7 3 5 10
+     * 8 9
+     * 9 6 8 10
+     * 10 7 9
      * - Premier nettoyage:
-     *     On supprime les clusters en trop, ceux qui sont contenus dans d'autres clusters
-     *     On a donc:
-     *       1 2 3 4 5
-     *       3 1 7
-     *       5 1 7
-     *       7 3 5 10
-     *       9 6 8 10
-     *       10 7 9
+     * On supprime les clusters en trop, ceux qui sont contenus dans d'autres clusters
+     * On a donc:
+     * 1 2 3 4 5
+     * 3 1 7
+     * 5 1 7
+     * 7 3 5 10
+     * 9 6 8 10
+     * 10 7 9
      * - Fusion:
-     *     On fusionne les clusters les plus proches les uns des autres jusqu'à n'avoir plus que n clusters
-     *     On a donc:
-     *       1 2 3 4 5 7 10 9
-     *       9 6 8 10
+     * On fusionne les clusters les plus proches les uns des autres jusqu'à n'avoir plus que n clusters
+     * On a donc:
+     * 1 2 3 4 5 7 10 9
+     * 9 6 8 10
      * - Deuxième nettoyage:
-     *     On supprime les doublons des clusters desquels ils sont le plus éloigné
-     *     A noter que si une entry est équidistante avec plusieurs clusters, un aléaoire se joue pour décider dans
-     *     lequel la laisser. Les résultats pour n > 3 sont donc susceptibles de changer
-     *     On a donc:
-     *       1 2 3 4 5 7
-     *       9 6 8 10
+     * On supprime les doublons des clusters desquels ils sont le plus éloigné
+     * A noter que si une entry est équidistante avec plusieurs clusters, un aléaoire se joue pour décider dans
+     * lequel la laisser. Les résultats pour n > 3 sont donc susceptibles de changer
+     * On a donc:
+     * 1 2 3 4 5 7
+     * 9 6 8 10
      *
      * @param n int
      */
-    public void dispatch(int n) {
+    public void dispatch(int n, boolean useRandom) {
         // Initialisation
         initDispatch();
         // Premier nettoyage (suppression des clusters en trop)
-        cleanClusters();
+        cleanClusters(n);
         // Fusion jusqu'à n'avoir plus que n clusters
         finalizeDispatch(n);
         // Deuxième nettoyage (dédoublonnage)
-        finalizeCleanClusters();
+        finalizeCleanClusters(useRandom);
     }
 
     /**
@@ -136,8 +137,9 @@ public class Master {
 
     /**
      * Nettoie les clusters en supprimant les doublons
+     * On limite la suppression par le nombre de clusters désirés par l'algo principal
      */
-    private void cleanClusters() {
+    private void cleanClusters(int n) {
         List<Cluster> clustersToRemove = new ArrayList<>();
         // Pour chaque cluster
         for (int i = 0; i < clusters.size(); i++) {
@@ -149,16 +151,14 @@ public class Master {
                     if (clusters.get(i).contains(clusters.get(j))) {
                         clustersToRemove.add(clusters.get(j));
                     }
-                    // Si le premier cluster est dans le second, on l'ajoute à la liste
-                    if (clusters.get(j).contains(clusters.get(i))) {
-                        clustersToRemove.add(clusters.get(i));
-                    }
                 }
             }
         }
         // On retire les clusters
-        for (Cluster cluster : clustersToRemove) {
-            clusters.remove(cluster);
+        int i = 0;
+        while (i < clustersToRemove.size() && clusters.size() > n) {
+            clusters.remove(clustersToRemove.get(i));
+            i++;
         }
     }
 
@@ -184,7 +184,7 @@ public class Master {
     /**
      * Nettoie les doublons
      */
-    private void finalizeCleanClusters() {
+    private void finalizeCleanClusters(boolean useRandom) {
         int distanceCluster1;
         int distanceCluster2;
         // Pour chaque cluster
@@ -205,19 +205,56 @@ public class Master {
                                 // On la supprime du second
                                 clusters.get(j).removeEntry(entry);
                                 // Si l'entry est plus proche du second que du premier
-                            } else if (distanceCluster1 > distanceCluster2) {
-                                // On la supprime du premier
-                                clusters.get(i).removeEntry(entry);
                             } else {
-                                // Sinon, on en supprime au hasard
-                                if (Math.random() > 0.5) {
-                                    clusters.get(j).removeEntry(entry);
+                                if (useRandom) {
+                                    if (distanceCluster1 > distanceCluster2) {
+                                        // On la supprime du premier
+                                        clusters.get(i).removeEntry(entry);
+                                    } else {
+                                        // Sinon, on en supprime au hasard
+                                        if (Math.random() > 0.5) {
+                                            clusters.get(j).removeEntry(entry);
+                                        } else {
+                                            clusters.get(i).removeEntry(entry);
+                                        }
+                                    }
                                 } else {
                                     clusters.get(i).removeEntry(entry);
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Tentative infructueuse d'amélioration des performances...
+     * Dommage
+     */
+    private void finalizeCleanClustersv2() {
+        // Pour chaque entry
+        for (Entry entry : entries) {
+            int distance = Entry.getMaxSize();
+            int d;
+            Cluster previousCluster = null;
+            // Pour chaque cluster
+            for (Cluster cluster : clusters) {
+                // Si le cluster a l'entry
+                if (cluster.contains(entry)) {
+                    // On récupère la distance
+                    d = entry.getMaximumDistanceWithCluster(cluster);
+                    if (previousCluster != null) {
+                        // Si elle est plus petite que la stockée
+                        if (d < distance) {
+                            distance = d;
+                            previousCluster.removeEntry(entry);
+                        } else {
+                            cluster.removeEntry(entry);
+                        }
+                    }
+                    previousCluster = cluster;
                 }
             }
         }

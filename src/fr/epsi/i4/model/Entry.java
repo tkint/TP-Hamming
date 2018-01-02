@@ -1,5 +1,7 @@
 package fr.epsi.i4.model;
 
+import java.security.InvalidParameterException;
+
 public class Entry {
 
     private static int nextId = 1;
@@ -9,9 +11,9 @@ public class Entry {
 
     private int id;
 
-    public Entry(int... data) throws Exception {
-        if (size > -1 && data.length > size) {
-            throw new Exception("Impossible d'ajouter ces data, vous allez casser l'intégrité des données");
+    public Entry(int... data) {
+        if (size > -1 && data.length != size) {
+            throw new InvalidParameterException("Impossible d'ajouter ces data, vous allez casser l'intégrité des données");
         }
         id = nextId;
         nextId++;
@@ -27,6 +29,10 @@ public class Entry {
      */
     public static int getMaxSize() {
         return size + 1;
+    }
+
+    public static void resetNextId() {
+        nextId = 1;
     }
 
     public int getId() {

@@ -115,8 +115,12 @@ public class Cluster {
      */
     public boolean contains(Cluster cluster) {
         boolean contains = true;
-        for (Entry entry : cluster.entries) {
-            contains &= contains(entry);
+        int i = 0;
+        while (i < cluster.entries.size() && contains) {
+            if (!contains(cluster.entries.get(i))) {
+                contains = false;
+            }
+            i++;
         }
         return contains;
     }
@@ -130,11 +134,11 @@ public class Cluster {
         int distance = Entry.getMaxSize();
         int d;
         // Pour chaque entry
-        for (int i = 0; i < entriesToAdd.size(); i++) {
+        for (Entry entry : entriesToAdd) {
             // Si on est pas sur la première entry du cluster
-            if (!entriesToAdd.get(i).equals(entries.get(0))) {
+            if (!entry.equals(entries.get(0))) {
                 // On récupère la distance entre les entry
-                d = entriesToAdd.get(i).distanceHamming(entries.get(0));
+                d = entry.distanceHamming(entries.get(0));
                 // Si la distance est plus petite
                 if (d < distance) {
                     // On mets à jour la distance
@@ -142,11 +146,11 @@ public class Cluster {
                     // On vide le cluster sauf la première donnée car c'est celle de référence
                     entries = entries.subList(0, 1);
                     // On ajoute l'élément actuel
-                    addEntry(entriesToAdd.get(i));
+                    addEntry(entry);
                     // Sinon, si la distance est égale
                 } else if (d == distance) {
                     // On ajoute l'élément actuel
-                    addEntry(entriesToAdd.get(i));
+                    addEntry(entry);
                 }
             }
         }

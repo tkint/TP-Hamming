@@ -3,49 +3,90 @@ package fr.epsi.i4;
 import fr.epsi.i4.model.Entry;
 import fr.epsi.i4.model.Master;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.security.InvalidParameterException;
+import java.util.Scanner;
+
 public class Main {
 
+    private static String message = "En combien de clusters voulez-vous diviser vos données? (0 pour quitter)";
+
     public static void main(String[] args) {
-        long time = System.currentTimeMillis();
+        Scanner scanner = new Scanner(System.in);
 
-        try {
-            Master master = new Master();
+        System.out.println("Allez-vous utiliser le random? [o/n]");
 
-            generateData(master);
+        String answer = scanner.next();
 
-            master.dispatch(2);
+        boolean useRandom = false;
 
-            System.out.println(master.toString());
-        } catch (Exception e) {
-            System.out.println(e);
+        if (answer.equals("o")) {
+            useRandom = true;
+            System.out.println("Avec random");
+        } else {
+            System.out.println("Sans random");
         }
 
-        System.out.println("\nLe programme s'est exécuté en " + (System.currentTimeMillis() - time) + " ms");
+        System.out.println(message);
+        while (scanner.hasNext()) {
+            String value = scanner.next();
+
+            try {
+                int nb = Integer.parseInt(value);
+
+                if (nb == 0) {
+                    break;
+                }
+
+                Master master = new Master();
+
+                generateData(master);
+
+                long time = System.currentTimeMillis();
+
+                master.dispatch(nb, useRandom);
+
+                System.out.println("\nLe programme s'est exécuté en " + (System.currentTimeMillis() - time) + " ms");
+
+                System.out.println(master.toString());
+            } catch (NumberFormatException e) {
+                System.out.println("Vous devez entrer un nombre!");
+            } finally {
+                System.out.println(message);
+            }
+        }
+
     }
 
-    public static void generateData(Master master) throws Exception {
-        master.addEntry(new Entry(1, 2, 2, 1)); // 1
-        master.addEntry(new Entry(1, 1, 2, 1)); // 2
-        master.addEntry(new Entry(2, 2, 2, 1)); // 3
-        master.addEntry(new Entry(1, 2, 1, 1)); // 4
-        master.addEntry(new Entry(1, 2, 2, 2)); // 5
-        master.addEntry(new Entry(1, 1, 1, 2)); // 6
-        master.addEntry(new Entry(2, 2, 2, 2)); // 7
-        master.addEntry(new Entry(2, 1, 1, 1)); // 8
-        master.addEntry(new Entry(2, 1, 1, 2)); // 9
-        master.addEntry(new Entry(2, 2, 1, 2)); // 10
-    }
+    private static void generateData(Master master) {
+        Entry.resetNextId();
 
-    public static void generateDataBis(Master master) throws Exception {
-        master.addEntry(new Entry(0, 2, 2, 0)); // 1
-        master.addEntry(new Entry(0, 1, 2, 0)); // 2
-        master.addEntry(new Entry(1, 2, 1, 1)); // 3
-        master.addEntry(new Entry(0, 2, 1, 0)); // 4
-        master.addEntry(new Entry(0, 2, 2, 1)); // 5
-        master.addEntry(new Entry(0, 1, 1, 1)); // 6
-        master.addEntry(new Entry(1, 2, 2, 1)); // 7
-        master.addEntry(new Entry(1, 1, 1, 0)); // 8
-        master.addEntry(new Entry(1, 1, 1, 1)); // 9
-        master.addEntry(new Entry(1, 2, 1, 1)); // 10
+        File file = new File("./entries.txt");
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+
+                String[] stringValues = line.split(" ");
+
+                int[] values = new int[stringValues.length];
+
+                for (int i = 0; i < stringValues.length; i++) {
+                    values[i] = Integer.valueOf(stringValues[i]);
+                }
+
+                master.addEntry(new Entry(values));
+            }
+        } catch (NumberFormatException ex) {
+            System.out.println("Mauvais format de données");
+            System.exit(1);
+        } catch (InvalidParameterException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        } catch (FileNotFoundException e) {
+            System.out.println("Le fichier est introuvable");
+            System.exit(1);
+        }
     }
 }
