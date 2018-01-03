@@ -2,17 +2,30 @@ package fr.epsi.i4.model;
 
 import javafx.util.Pair;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Master {
 
+    private static int[][] distances;
     private List<Cluster> clusters;
     private List<Entry> entries;
+    private String fileRelativePath;
 
-    public Master() {
-        clusters = new ArrayList<>();
-        entries = new ArrayList<>();
+    public Master(String filename) {
+        this.clusters = new ArrayList<>();
+        this.entries = new ArrayList<>();
+        this.fileRelativePath = filename;
+        retrieveData();
+        generateDistances();
+    }
+
+    public static int getDistance(int i, int j) {
+        return distances[i][j];
     }
 
     @Override
@@ -31,6 +44,52 @@ public class Master {
             }
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * Récupère les entrées depuis le fichier
+     */
+    private void retrieveData() {
+        Entry.resetNextId();
+
+        File file = new File(fileRelativePath);
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+
+                String[] stringValues = line.split(" ");
+
+                int[] values = new int[stringValues.length];
+
+                for (int i = 0; i < stringValues.length; i++) {
+                    values[i] = Integer.valueOf(stringValues[i]);
+                }
+
+                addEntry(new Entry(values));
+            }
+        } catch (NumberFormatException ex) {
+            System.out.println("Mauvais format de données");
+            System.exit(1);
+        } catch (InvalidParameterException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        } catch (FileNotFoundException e) {
+            System.out.println("Le fichier est introuvable");
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Génère la matrice des distances pour les stocker
+     */
+    private void generateDistances() {
+        distances = new int[entries.size()][entries.size()];
+        for (int i = 0; i < entries.size(); i++) {
+            for (int j = 0; j < entries.size(); j++) {
+                distances[i][j] = entries.get(i).distanceHamming(entries.get(j));
+            }
+        }
     }
 
     /**
@@ -60,7 +119,7 @@ public class Master {
                         .append(" et ")
                         .append(entries.get(j).getId())
                         .append(" : ")
-                        .append(entries.get(i).distanceHamming(entries.get(j)));
+                        .append(getDistance(entries.get(i).getPosition(), entries.get(j).getPosition()));
             }
         }
         return stringBuilder.toString();
@@ -114,7 +173,7 @@ public class Master {
         // Premier nettoyage (suppression des clusters en trop)
         cleanClusters(n);
         // Fusion jusqu'à n'avoir plus que n clusters
-        finalizeDispatch(n);
+        mergeClusters(n);
         // Deuxième nettoyage (dédoublonnage)
         finalizeCleanClusters(useRandom);
     }
@@ -167,7 +226,7 @@ public class Master {
      *
      * @param n int
      */
-    private void finalizeDispatch(int n) {
+    private void mergeClusters(int n) {
         // Tant qu'on a pas le nombre de clusters désiré
         while (clusters.size() > n) {
             // On prend les deux clusters les plus proches l'un de l'autre

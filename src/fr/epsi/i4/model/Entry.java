@@ -39,6 +39,10 @@ public class Entry {
         return id;
     }
 
+    public int getPosition() {
+        return id - 1;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("Entry{");
@@ -82,7 +86,7 @@ public class Entry {
         // Pour chaque entrée du cluster distant
         for (Entry entry : cluster.getEntries()) {
             // On récupère la distance entre les deux entrées
-            int d = distanceHamming(entry);
+            int d = Master.getDistance(getPosition(), entry.getPosition());
             // Si elle est supérieure à la distance déjà enregistrée
             if (d > distance) {
                 // On enregistre la nouvelle distance

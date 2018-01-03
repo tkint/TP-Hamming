@@ -15,10 +15,6 @@ public class Cluster {
         return entries;
     }
 
-    public void setEntries(List<Entry> entries) {
-        this.entries = entries;
-    }
-
     @Override
     public String toString() {
         return "Cluster{" +
@@ -62,7 +58,7 @@ public class Cluster {
             // Pour chaque entrée du cluster distant
             for (Entry entry2 : cluster.getEntries()) {
                 // On récupère la distance entre les deux entrées
-                int d = entry1.distanceHamming(entry2);
+                int d = Master.getDistance(entry1.getPosition(), entry2.getPosition());
                 // Si elle est supérieure à la distance déjà enregistrée
                 if (d > distance) {
                     // On enregistre la nouvelle distance
@@ -138,7 +134,7 @@ public class Cluster {
             // Si on est pas sur la première entry du cluster
             if (!entry.equals(entries.get(0))) {
                 // On récupère la distance entre les entry
-                d = entry.distanceHamming(entries.get(0));
+                d = Master.getDistance(entry.getPosition(), entries.get(0).getPosition());
                 // Si la distance est plus petite
                 if (d < distance) {
                     // On mets à jour la distance
